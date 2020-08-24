@@ -1,7 +1,7 @@
+use crate::result::Result;
 use diesel::r2d2::ConnectionManager;
 use diesel::sqlite::SqliteConnection;
 use r2d2::Pool;
-use crate::result::Result;
 
 pub type DbPool = Pool<ConnectionManager<SqliteConnection>>;
 

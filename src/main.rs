@@ -8,10 +8,10 @@ extern crate diesel;
 extern crate log;
 
 mod db;
-mod models;
-mod schema;
-mod result;
 mod handlers;
+mod models;
+mod result;
+mod schema;
 
 use crate::result::Result;
 use actix_web::middleware::Logger;
