@@ -1,7 +1,8 @@
-use crate::db::DbPool;
-use crate::models::*;
-use crate::result::{JsResult, Result};
-use crate::schema::*;
+use crate::backend::db::DbPool;
+use crate::backend::result::{JsResult, Result};
+use crate::backend::schema::*;
+use crate::common::models::*;
+
 use actix_web::http::StatusCode;
 use actix_web::web::{Data, Json, Path, ServiceConfig};
 use actix_web::{get, post, put, Error, HttpRequest, HttpResponse, Responder};
@@ -28,7 +29,7 @@ impl Responder for Empty {
     }
 }
 
-#[get("/events/statuses")]
+#[get("/api/events/statuses")]
 async fn get_event_statuses(pool: Data<DbPool>) -> JsResult<Vec<EventStatus>> {
     use self::event_statuses::dsl::*;
     let conn = pool.get()?;
@@ -36,7 +37,7 @@ async fn get_event_statuses(pool: Data<DbPool>) -> JsResult<Vec<EventStatus>> {
     Ok(Json(results))
 }
 
-#[get("/events")]
+#[get("/api/events")]
 async fn get_events(pool: Data<DbPool>) -> JsResult<Vec<Event>> {
     use self::events::dsl::*;
     let conn = pool.get()?;
@@ -44,7 +45,7 @@ async fn get_events(pool: Data<DbPool>) -> JsResult<Vec<Event>> {
     Ok(Json(results))
 }
 
-#[get("/events/{pk}")]
+#[get("/api/events/{pk}")]
 async fn get_event(pool: Data<DbPool>, pk: Path<i32>) -> JsResult<Event> {
     use self::events::dsl::*;
     let conn = pool.get()?;
@@ -52,7 +53,7 @@ async fn get_event(pool: Data<DbPool>, pk: Path<i32>) -> JsResult<Event> {
     Ok(Json(result))
 }
 
-#[get("/festivals")]
+#[get("/api/festivals")]
 async fn get_festivals(pool: Data<DbPool>) -> JsResult<Vec<Festival>> {
     use self::festivals::dsl::*;
     let conn = pool.get()?;
@@ -60,7 +61,7 @@ async fn get_festivals(pool: Data<DbPool>) -> JsResult<Vec<Festival>> {
     Ok(Json(results))
 }
 
-#[get("/festivals/{pk}")]
+#[get("/api/festivals/{pk}")]
 async fn get_festival(pool: Data<DbPool>, pk: Path<i32>) -> JsResult<Festival> {
     use self::festivals::dsl::*;
     let conn = pool.get()?;
@@ -68,7 +69,7 @@ async fn get_festival(pool: Data<DbPool>, pk: Path<i32>) -> JsResult<Festival> {
     Ok(Json(result))
 }
 
-#[post("/festivals")]
+#[post("/api/festivals")]
 async fn post_festival(pool: Data<DbPool>, festival: Json<NewFestival>) -> Result<Empty> {
     let conn = pool.get()?;
     diesel::insert_into(festivals::table)
@@ -77,7 +78,7 @@ async fn post_festival(pool: Data<DbPool>, festival: Json<NewFestival>) -> Resul
     Ok(Empty)
 }
 
-#[post("/festivals")]
+#[post("/api/festivals")]
 async fn post_event(pool: Data<DbPool>, event: Json<NewEvent>) -> Result<Empty> {
     let conn = pool.get()?;
     diesel::insert_into(events::table)
@@ -86,7 +87,7 @@ async fn post_event(pool: Data<DbPool>, event: Json<NewEvent>) -> Result<Empty> 
     Ok(Empty)
 }
 
-#[put("/events/{pk}")]
+#[put("/api/events/{pk}")]
 async fn put_event(pool: Data<DbPool>, pk: Path<i32>, event: Json<NewEvent>) -> Result<Empty> {
     use self::events::dsl::*;
     let conn = pool.get()?;
@@ -96,7 +97,7 @@ async fn put_event(pool: Data<DbPool>, pk: Path<i32>, event: Json<NewEvent>) -> 
     Ok(Empty)
 }
 
-#[put("/festivals/{pk}")]
+#[put("/api/festivals/{pk}")]
 async fn put_festival(
     pool: Data<DbPool>,
     pk: Path<i32>,

@@ -1,6 +1,8 @@
-use crate::schema::*;
+#[cfg(not(target_arch = "wasm32"))]
+use crate::backend::schema::*;
 
-#[derive(Queryable, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
+#[cfg_attr(not(target_arch = "wasm32"), derive(Queryable))]
 pub struct Festival {
     pub id: i32,
     pub name: String,
@@ -10,8 +12,12 @@ pub struct Festival {
     pub facebook_url: Option<String>,
 }
 
-#[derive(Insertable, AsChangeset, Deserialize)]
-#[table_name = "festivals"]
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(Insertable, AsChangeset),
+    table_name = "festivals"
+)]
 pub struct NewFestival {
     pub name: String,
     pub description: String,
@@ -20,7 +26,8 @@ pub struct NewFestival {
     pub facebook_url: Option<String>,
 }
 
-#[derive(Queryable, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
+#[cfg_attr(not(target_arch = "wasm32"), derive(Queryable))]
 pub struct Event {
     pub id: i32,
     pub festival_id: i32,
@@ -37,8 +44,12 @@ pub struct Event {
     pub end_date: i32,
 }
 
-#[derive(Insertable, AsChangeset, Deserialize)]
-#[table_name = "events"]
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(
+    not(target_arch = "wasm32"),
+    derive(Insertable, AsChangeset),
+    table_name = "events"
+)]
 pub struct NewEvent {
     pub festival_id: i32,
     pub status: i32,
@@ -54,7 +65,8 @@ pub struct NewEvent {
     pub end_date: i32,
 }
 
-#[derive(Queryable, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
+#[cfg_attr(not(target_arch = "wasm32"), derive(Queryable))]
 pub struct EventStatus {
     id: i32,
     name: String,

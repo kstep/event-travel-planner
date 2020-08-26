@@ -1,4 +1,4 @@
-use crate::result::Result;
+use crate::backend::result::Result;
 use diesel::r2d2::ConnectionManager;
 use diesel::sqlite::SqliteConnection;
 use r2d2::Pool;
