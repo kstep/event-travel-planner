@@ -8,10 +8,6 @@ extern crate log;
 #[cfg(not(target_arch = "wasm32"))]
 extern crate diesel;
 
-#[macro_use]
-#[cfg(target_arch = "wasm32")]
-extern crate wasm_bindgen;
-
 mod common;
 
 #[cfg(not(target_arch = "wasm32"))]

@@ -8,8 +8,6 @@ mod handlers;
 mod result;
 pub mod schema;
 
-pub use result::Error;
-
 #[derive(Deserialize)]
 struct Config {
     database_url: String,

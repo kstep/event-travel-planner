@@ -75,11 +75,13 @@ impl Component for Model {
     }
 
     fn view(&self) -> Html {
-        let festival_row = |festival: &Festival| html! {
-            <tr>
-                <td>{ festival.id }</td>
-                <td>{ &festival.name }</td>
-            </tr>
+        let festival_row = |festival: &Festival| {
+            html! {
+                <tr>
+                    <td>{ festival.id }</td>
+                    <td>{ &festival.name }</td>
+                </tr>
+            }
         };
 
         html! {
