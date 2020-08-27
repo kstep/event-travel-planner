@@ -13,13 +13,13 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 struct Model {
     link: ComponentLink<Self>,
-    value: i64,
     fetch_task: Option<FetchTask>,
+    festivals: Vec<Festival>,
 }
 
 enum Msg {
-    AddOne,
-    FetchReady(Vec<Festival>),
+    LoadFestivals,
+    FetchFestivals(Vec<Festival>),
     FetchFailed,
 }
 
@@ -29,20 +29,21 @@ impl Component for Model {
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
         Self {
             link,
-            value: 0,
             fetch_task: None,
+            festivals: Vec::new(),
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::FetchReady(text) => {
-                warn!("response: {:?}", text);
+            Msg::FetchFestivals(festivals) => {
+                warn!("response: {:?}", festivals);
                 self.fetch_task = None;
-                false
+                self.festivals = festivals;
+                true
             }
             Msg::FetchFailed => false,
-            Msg::AddOne => {
+            Msg::LoadFestivals => {
                 if self.fetch_task.is_none() {
                     let request = Request::get("/api/festivals").body(Nothing).unwrap();
                     let task = FetchService::fetch(
@@ -51,7 +52,7 @@ impl Component for Model {
                             |response: Response<Json<Result<Vec<Festival>, Error>>>| match response
                                 .into_parts()
                             {
-                                (_meta, Json(Ok(data))) => Msg::FetchReady(data),
+                                (_meta, Json(Ok(data))) => Msg::FetchFestivals(data),
                                 (_meta, Json(Err(error))) => {
                                     error!("Fetch failed: {:?}", error);
                                     Msg::FetchFailed
@@ -61,8 +62,7 @@ impl Component for Model {
                     );
                     self.fetch_task = task.ok();
                 }
-                self.value += 1;
-                true
+                false
             }
         }
     }
@@ -75,11 +75,21 @@ impl Component for Model {
     }
 
     fn view(&self) -> Html {
+        let festival_row = |festival: &Festival| html! {
+            <tr>
+                <td>{ festival.id }</td>
+                <td>{ &festival.name }</td>
+            </tr>
+        };
+
         html! {
             <div class="container">
                 <h1 class="mt-5">{ "Event Travel Planner" }</h1>
-                <button onclick=self.link.callback(|_| Msg::AddOne)>{ "+1" }</button>
-                <p>{ self.value }</p>
+                <button onclick=self.link.callback(|_| Msg::LoadFestivals)>{ "load fests" }</button>
+
+                <table>
+                    { for self.festivals.iter().map(festival_row) }
+                </table>
             </div>
         }
     }
