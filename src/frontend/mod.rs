@@ -1,98 +1,58 @@
-use crate::common::models::*;
+mod events;
+mod festivals;
+mod routes;
 
-use anyhow::Error;
+use crate::common::models::*;
+use crate::frontend::routes::{Anchor, FetchModel, Router};
 use wasm_bindgen::prelude::*;
-use yew::format::{Json, Nothing};
 use yew::macros::html;
-use yew::services::fetch::{FetchTask, Request, Response};
-use yew::services::FetchService;
 use yew::{Component, ComponentLink, Html, ShouldRender};
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-struct Model {
-    link: ComponentLink<Self>,
-    fetch_task: Option<FetchTask>,
-    festivals: Vec<Festival>,
-}
+use crate::frontend::routes::AppRoute;
 
-enum Msg {
-    LoadFestivals,
-    FetchFestivals(Vec<Festival>),
-    FetchFailed,
-}
+struct Model {}
 
 impl Component for Model {
-    type Message = Msg;
+    type Message = ();
     type Properties = ();
-    fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Self {
-            link,
-            fetch_task: None,
-            festivals: Vec::new(),
-        }
+
+    fn create(_props: Self::Properties, _link: ComponentLink<Self>) -> Self {
+        Model {}
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
-        match msg {
-            Msg::FetchFestivals(festivals) => {
-                warn!("response: {:?}", festivals);
-                self.fetch_task = None;
-                self.festivals = festivals;
-                true
-            }
-            Msg::FetchFailed => false,
-            Msg::LoadFestivals => {
-                if self.fetch_task.is_none() {
-                    let request = Request::get("/api/festivals").body(Nothing).unwrap();
-                    let task = FetchService::fetch(
-                        request,
-                        self.link.callback(
-                            |response: Response<Json<Result<Vec<Festival>, Error>>>| match response
-                                .into_parts()
-                            {
-                                (_meta, Json(Ok(data))) => Msg::FetchFestivals(data),
-                                (_meta, Json(Err(error))) => {
-                                    error!("Fetch failed: {:?}", error);
-                                    Msg::FetchFailed
-                                }
-                            },
-                        ),
-                    );
-                    self.fetch_task = task.ok();
-                }
-                false
-            }
-        }
+    fn update(&mut self, _msg: Self::Message) -> ShouldRender {
+        true
     }
 
     fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        // Should only return "true" if new properties are different to
-        // previously received properties.
-        // This component has no properties so we will always return "false".
         false
     }
 
     fn view(&self) -> Html {
-        let festival_row = |festival: &Festival| {
-            html! {
-                <tr>
-                    <td>{ festival.id }</td>
-                    <td>{ &festival.name }</td>
-                </tr>
-            }
-        };
-
         html! {
-            <div class="container">
-                <h1 class="mt-5">{ "Event Travel Planner" }</h1>
-                <button onclick=self.link.callback(|_| Msg::LoadFestivals)>{ "load fests" }</button>
+            <>
+                <nav class="menu">
+                    <ul>
+                        <li><Anchor route = AppRoute::Home>{ "Home" }</Anchor></li>
+                        <li><Anchor route = AppRoute::Festivals>{ "Festivals" }</Anchor></li>
+                        <li><Anchor route = AppRoute::Events>{ "Events" }</Anchor></li>
+                    </ul>
+                </nav>
+                <Router render = Router::render(Self::route) />
+            </>
+        }
+    }
+}
 
-                <table>
-                    { for self.festivals.iter().map(festival_row) }
-                </table>
-            </div>
+impl Model {
+    fn route(switch: AppRoute) -> Html {
+        match switch {
+            AppRoute::Festivals => html! {<FetchModel<Festival> url = "/api/festivals" />},
+            AppRoute::Events => html! {<FetchModel<Event> url = "/api/events" />},
+            AppRoute::Home => html! {<div></div>},
         }
     }
 }

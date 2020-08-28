@@ -8,6 +8,10 @@ extern crate log;
 #[cfg(not(target_arch = "wasm32"))]
 extern crate diesel;
 
+#[macro_use]
+#[cfg(target_arch = "wasm32")]
+extern crate yew_router;
+
 mod common;
 
 #[cfg(not(target_arch = "wasm32"))]
